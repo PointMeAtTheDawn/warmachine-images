@@ -7,14 +7,14 @@ from pdf2image import convert_from_path
 from base64 import b64encode
 
 def parse_images(fronts, backs, page):
-    fronts.append(page.crop((70,114,444,639)))
-    fronts.append(page.crop((447,114,821,639)))
-    fronts.append(page.crop((824,114,1198,639)))
-    fronts.append(page.crop((1202,114,1576,639)))
-    backs.append(page.crop((70,641,444,1165)))
-    backs.append(page.crop((447,641,821,1165)))
-    backs.append(page.crop((824,641,1198,1165)))
-    backs.append(page.crop((1202,641,1576,1165)))
+    fronts.append(page.crop((94,151,592,852)))
+    fronts.append(page.crop((597,151,1095,852)))
+    fronts.append(page.crop((1099,151,1598,852)))
+    fronts.append(page.crop((1602,151,2101,852)))
+    backs.append(page.crop((94,855,592,1553)))
+    backs.append(page.crop((597,855,1095,1553)))
+    backs.append(page.crop((1099,855,1598,1553)))
+    backs.append(page.crop((1602,855,2101,1553)))
 
 def imgur_upload(args, links, image, name):
     image.save(name)
@@ -31,17 +31,18 @@ def imgur_upload(args, links, image, name):
             'title': name
         }
     )
+    print(r.json())
     links[name] = r.json()["data"]["link"]
     os.remove(name)
 
 def package_page(args, links, cardFronts, cardBacks):
-    fronts = Image.new('RGB',(2992,2625))
-    backs = Image.new('RGB',(2992,2625))
-    for j in range(40):
-        if len(cardFronts) <= i*40+j:
+    fronts = Image.new('RGB',(2988,3505))
+    backs = Image.new('RGB',(2988,3505))
+    for j in range(30):
+        if len(cardFronts) <= i*30+j:
             continue
-        fronts.paste(cardFronts[i*40+j], (j%8*374,(j//8)*525))
-        backs.paste(cardBacks[i*40+j].rotate(180), (j%8*374,(j//8)*525))
+        fronts.paste(cardFronts[i*30+j], (j%6*498,(j//6)*701))
+        backs.paste(cardBacks[i*30+j].rotate(180), (j%6*498,(j//6)*701))
     t1 = threading.Thread(target=imgur_upload, args=(args,links,fronts,f'f-{i}.png'))
     t1.start()
     t2 = threading.Thread(target=imgur_upload, args=(args,links,backs,f'b-{i}.png'))
@@ -72,13 +73,13 @@ if __name__ == '__main__':
     cardFronts = []
     cardBacks = []
     infile = 'cardbundle.pdf'
-    pages = convert_from_path(infile, 150)
+    pages = convert_from_path(infile)
     for page in pages:
         parse_images(cardFronts, cardBacks, page)
     
     # Collate the cards into the image format Tabletop Simulator requires.
     links = {}
-    deckCount = len(cardFronts)//40+1
+    deckCount = len(cardFronts)//30+1
 
     for i in range(deckCount):
         package_page(args, links, cardFronts, cardBacks)
