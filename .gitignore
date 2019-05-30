@@ -1,2 +1,4 @@
 cardbundle.pdf
 secrets.txt
+*.jpg
+.vscode/*
