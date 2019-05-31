@@ -1,4 +1,7 @@
 cardbundle.pdf
-secrets.txt
+credentials.json
 *.jpg
 .vscode/*
+token.pickle
+*.json
+!decktemplate.json
