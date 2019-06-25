@@ -4,6 +4,7 @@ This turns a cardbundle.pdf (downloaded from Privateer Press' Card DB, placed in
 
 Prerequisites:
 * [Python](https://www.python.org/downloads/)
+* [Poppler - Windows](http://blog.alivate.com.au/poppler-windows/) / [Poppler - All](https://poppler.freedesktop.org/)
 * Modules: `pip install -r requirements.txt`
 
 Usage:
