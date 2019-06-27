@@ -1,7 +1,6 @@
-cardbundle.pdf
-credentials.json
+cardbundle*.pdf
 *.jpg
 .vscode/*
-token.pickle
+pdf_parts/*.ppm
 *.json
 !decktemplate.json
