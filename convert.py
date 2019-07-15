@@ -51,7 +51,7 @@ def load_config():
             api_key=data["api_key"],
             api_secret=data["api_secret"]
         )
-        return data["saved_objects_folder"]
+        return data["width"], data["height"], data["saved_objects_folder"]
 
 def image_upload(name, links):
     """Upload a compiled TTS-compatible deck template image into Cloudinary."""
@@ -63,21 +63,25 @@ def image_upload(name, links):
     print(links[name])
 
 
-def package_pages(fronts, backs, page_count, links):
+def package_pages(cards_width, cards_height, fronts, backs, page_count, links):
     """Stitch together card images into a TTS-compatible deck template image"""
-    width = 410
-    height = 585
+    pixel_width = 4096//cards_width
+    pixel_height = 4096//cards_height
     for i in range(page_count):
         fronts_image = Image.new("RGB", (4096, 4096))
         backs_image = Image.new("RGB", (4096, 4096))
 
-        for j in range(70):
-            if len(fronts) <= i * 70 + j:
+        for j in range(cards_width * cards_height):
+            if len(fronts) <= i * cards_width * cards_height + j:
                 continue
-            front = fronts[i * 70 + j].resize((width, height), Image.BICUBIC)
-            back = backs[i * 70 + j].resize((width, height), Image.BICUBIC).rotate(180)
-            fronts_image.paste(front, (j % 10 * width, (j // 10) * height))
-            backs_image.paste(back, (j % 10 * width, (j // 10) * height))
+            front = fronts[i * cards_width * cards_height + j].resize(
+                (pixel_width, pixel_height), Image.BICUBIC)
+            back = backs[i * cards_width * cards_height + j].resize(
+                (pixel_width, pixel_height), Image.BICUBIC).rotate(180)
+            fronts_image.paste(front, (j % cards_width * pixel_width,
+                                       (j // cards_width) * pixel_height))
+            backs_image.paste(back, (j % cards_width * pixel_width,
+                                     (j // cards_width) * pixel_height))
 
         fronts_image.save(f"f-{i}.jpg")
         backs_image.save(f"b-{i}.jpg")
@@ -120,7 +124,7 @@ def convert():
     """This converts a cardbundle.pdf (downloaded from Privateer Press) into
     Tabletop Simulator deck Saved Objects."""
     args = parse_arguments()
-    saved_objects_folder = load_config()
+    width, height, saved_objects_folder = load_config()
     if args.name is None:
         args.name = "Warmachine"
     print("Naming decks: " + args.name + "X")
@@ -146,8 +150,8 @@ def convert():
 
     # Collate the cards into the image format Tabletop Simulator requires.
     links = {}
-    deck_count = len(card_fronts) // 70 + 1
-    package_pages(filtered_fronts, filtered_backs, deck_count, links)
+    deck_count = len(card_fronts) // (width*height) + 1
+    package_pages(width, height, filtered_fronts, filtered_backs, deck_count, links)
     print("Packaging cards into TTS deck template images and uploading to Cloudinary complete.")
 
     # And let's shove em all in your Saved Objects folder :)
